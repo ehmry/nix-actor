@@ -1,15 +1,17 @@
 # SPDX-License-Identifier: MIT
 
 import
-  std / typetraits, preserves
+  preserves, std / tables
 
 type
-  Serve* {.preservesRecord: "serve".} = object
+  Eval* {.preservesRecord: "eval".} = object
+  
+  Realise* {.preservesRecord: "realise".} = object
   
   Build* {.preservesRecord: "nix-build".} = object
   
-proc `$`*(x: Serve | Build): string =
+proc `$`*(x: Eval | Realise | Build): string =
   `$`(toPreserve(x))
 
-proc encode*(x: Serve | Build): seq[byte] =
+proc encode*(x: Eval | Realise | Build): seq[byte] =
   encode(toPreserve(x))
