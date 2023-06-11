@@ -6,7 +6,10 @@ import
 type
   Eval* {.preservesRecord: "eval".} = object
   
+  AttrSet* = Table[Symbol, Preserve[void]]
   Realise* {.preservesRecord: "realise".} = object
+  
+  LegacyPathAttrs* {.preservesDictionary.} = object
   
   Missing* {.preservesRecord: "missing".} = object
   
@@ -21,40 +24,51 @@ type
     of FieldKind.`string`:
       
   
-  PathInfo* {.preservesRecord: "path-info".} = object
+  StringSet* = HashSet[string]
+  AddToStoreAttrs* {.preservesDictionary.} = object
   
-  Dict* = Table[Symbol, Preserve[void]]
+  AddToStoreClientAttrs* {.preservesDictionary.} = object
+  
+  PathInfo* {.preservesRecord: "path".} = object
+  
   Build* {.preservesRecord: "nix-build".} = object
   
   Fields* = seq[Field]
   ActionStart* {.preservesRecord: "start".} = object
   
-  FieldString* = string
   Instantiate* {.preservesRecord: "instantiate".} = object
   
-  FieldInt* = BiggestInt
+  StringSeq* = seq[string]
   ActionStop* {.preservesRecord: "stop".} = object
   
   ActionResult* {.preservesRecord: "result".} = object
   
-proc `$`*(x: Eval | Realise | Missing | Narinfo | Field | PathInfo | Dict |
+proc `$`*(x: Eval | AttrSet | Realise | LegacyPathAttrs | Missing | Narinfo |
+    Field |
+    StringSet |
+    AddToStoreAttrs |
+    AddToStoreClientAttrs |
+    PathInfo |
     Build |
     Fields |
     ActionStart |
-    FieldString |
     Instantiate |
-    FieldInt |
+    StringSeq |
     ActionStop |
     ActionResult): string =
   `$`(toPreserve(x))
 
-proc encode*(x: Eval | Realise | Missing | Narinfo | Field | PathInfo | Dict |
+proc encode*(x: Eval | AttrSet | Realise | LegacyPathAttrs | Missing | Narinfo |
+    Field |
+    StringSet |
+    AddToStoreAttrs |
+    AddToStoreClientAttrs |
+    PathInfo |
     Build |
     Fields |
     ActionStart |
-    FieldString |
     Instantiate |
-    FieldInt |
+    StringSeq |
     ActionStop |
     ActionResult): seq[byte] =
   encode(toPreserve(x))
