@@ -25,7 +25,7 @@ import
 
 type
   Value = Preserve[void]
-  Observe = dataspace.Observe[Ref]
+  Observe = dataspace.Observe[Cap]
 proc toPreserve(val: libexpr.ValueObj | libExpr.ValuePtr; state: EvalState;
                 E = void): Preserve[E] {.gcsafe.} =
   ## Convert a Nix value to a Preserves value.
@@ -95,7 +95,7 @@ proc instantiate(instantiate: Instantiate): Value =
   var execOutput = strip execProcess(cmd, args = args, options = {poUsePath})
   execOutput.toPreserve
 
-proc bootNixFacet(turn: var Turn; ds: Ref): Facet =
+proc bootNixFacet(turn: var Turn; ds: Cap): Facet =
   result = inFacet(turn)do (turn: var Turn):
     during(turn, ds, ?Observe(pattern: !Build) ?? {0: grabLit()})do (
         spec: string):(discard publish(turn, ds, build(spec)))
@@ -115,7 +115,7 @@ proc bootNixFacet(turn: var Turn; ds: Ref): Facet =
         discard publish(turn, ds, ass)
 
 type
-  RefArgs {.preservesDictionary.} = object
+  CapArgs {.preservesDictionary.} = object
   
   ClientSideArgs {.preservesDictionary.} = object
   
@@ -123,20 +123,27 @@ type
   
 main.initNix()
 libexpr.initGC()
-runActor("main")do (root: Ref; turn: var Turn):
+runActor("main")do (root: Cap; turn: var Turn):
   let
     erisStore = newMemoryStore()
     nixStore = openStore()
     nixState = newEvalState(nixStore)
   connectStdio(root, turn)
-  during(turn, root, ?RefArgs)do (ds: Ref):
+  during(turn, root, ?CapArgs)do (ds: Cap):
+    discard publish(turn, ds,
+                    initRecord("nixVersion", toPreserve($nixVersion.c_str)))
     discard bootNixFacet(turn, ds)
     during(turn, ds, ?Observe(pattern: !Eval) ?? {0: grabLit(), 1: grabDict()})do (
         e: string; o: Assertion):
       var ass = Eval(expr: e)
       doAssert fromPreserve(ass.options, unpackLiterals(o))
-      ass.result = eval(nixState, ass.expr)
-      discard publish(turn, ds, ass)
+      try:
+        ass.result = eval(nixState, ass.expr)
+        discard publish(turn, ds, ass)
+      except CatchableError as err:
+        stderr.writeLine "failed to evaluate ", ass.expr, ": ", err.msg
+      except StdException as err:
+        stderr.writeLine "failed to evaluate ", ass.expr, ": ", err.what
     during(turn, root, ?ClientSideArgs)do (socketPath: string):
       bootClientSide(turn, ds, erisStore, socketPath)
     during(turn, root, ?DaemonSideArgs)do (socketPath: string):
