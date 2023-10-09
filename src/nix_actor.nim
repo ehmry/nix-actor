@@ -10,7 +10,7 @@ import
   preserves, preserves / jsonhooks
 
 import
-  syndicate
+  syndicate, syndicate / relays
 
 from syndicate / protocols / dataspace import Observe
 
