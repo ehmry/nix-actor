@@ -1,74 +1,71 @@
 # SPDX-License-Identifier: MIT
 
 import
-  preserves, std / sets, std / tables
+  preserves, std / tables
 
 type
+  Error* {.preservesRecord: "error".} = object
+  
   Eval* {.preservesRecord: "eval".} = object
   
-  AttrSet* = Table[Symbol, Preserve[void]]
+  AttrSet* = Table[Symbol, Value]
   Realise* {.preservesRecord: "realise".} = object
   
-  LegacyPathAttrs* {.preservesDictionary.} = object
+  Derivation* {.preservesRecord: "drv".} = object
   
-  Missing* {.preservesRecord: "missing".} = object
-  
-  Narinfo* {.preservesRecord: "narinfo".} = object
-  
-  FieldKind* {.pure.} = enum
-    `int`, `string`
-  `Field`* {.preservesOr.} = object
-    case orKind*: FieldKind
-    of FieldKind.`int`:
+  RealiseResultKind* {.pure.} = enum
+    `Error`, `Outputs`
+  `RealiseResult`* {.preservesOr.} = object
+    case orKind*: RealiseResultKind
+    of RealiseResultKind.`Error`:
       
-    of FieldKind.`string`:
+    of RealiseResultKind.`Outputs`:
       
   
-  StringSet* = HashSet[string]
-  AddToStoreAttrs* {.preservesDictionary.} = object
+  EvalSuccess* {.preservesTuple.} = object
   
-  AddToStoreClientAttrs* {.preservesDictionary.} = object
+  EvalResultKind* {.pure.} = enum
+    `Error`, `EvalSuccess`
+  `EvalResult`* {.preservesOr.} = object
+    case orKind*: EvalResultKind
+    of EvalResultKind.`Error`:
+      
+    of EvalResultKind.`EvalSuccess`:
+      
   
-  PathInfo* {.preservesRecord: "path".} = object
+  InstantiateResultKind* {.pure.} = enum
+    `Error`, `Derivation`
+  `InstantiateResult`* {.preservesOr.} = object
+    case orKind*: InstantiateResultKind
+    of InstantiateResultKind.`Error`:
+      
+    of InstantiateResultKind.`Derivation`:
+      
   
-  Build* {.preservesRecord: "nix-build".} = object
-  
-  Fields* = seq[Field]
-  ActionStart* {.preservesRecord: "start".} = object
+  ResolveStep* {.preservesRecord: "nix-actor".} = object
   
   Instantiate* {.preservesRecord: "instantiate".} = object
   
-  StringSeq* = seq[string]
-  ActionStop* {.preservesRecord: "stop".} = object
+  Outputs* {.preservesRecord: "outputs".} = object
   
-  ActionResult* {.preservesRecord: "result".} = object
+  ResolveDetail* {.preservesDictionary.} = object
   
-proc `$`*(x: Eval | AttrSet | Realise | LegacyPathAttrs | Missing | Narinfo |
-    Field |
-    StringSet |
-    AddToStoreAttrs |
-    AddToStoreClientAttrs |
-    PathInfo |
-    Build |
-    Fields |
-    ActionStart |
+proc `$`*(x: Error | Eval | AttrSet | Realise | Derivation | RealiseResult |
+    EvalSuccess |
+    EvalResult |
+    InstantiateResult |
+    ResolveStep |
     Instantiate |
-    StringSeq |
-    ActionStop |
-    ActionResult): string =
-  `$`(toPreserve(x))
+    Outputs |
+    ResolveDetail): string =
+  `$`(toPreserves(x))
 
-proc encode*(x: Eval | AttrSet | Realise | LegacyPathAttrs | Missing | Narinfo |
-    Field |
-    StringSet |
-    AddToStoreAttrs |
-    AddToStoreClientAttrs |
-    PathInfo |
-    Build |
-    Fields |
-    ActionStart |
+proc encode*(x: Error | Eval | AttrSet | Realise | Derivation | RealiseResult |
+    EvalSuccess |
+    EvalResult |
+    InstantiateResult |
+    ResolveStep |
     Instantiate |
-    StringSeq |
-    ActionStop |
-    ActionResult): seq[byte] =
-  encode(toPreserve(x))
+    Outputs |
+    ResolveDetail): seq[byte] =
+  encode(toPreserves(x))
