@@ -6,8 +6,8 @@ import
 export
   NixContext, Store, EvalState, Value, ValueType, gc_decref, isNil
 
-{.passC: staticExec("pkg-config --cflags nix-expr-c").}
-{.passL: staticExec("pkg-config --libs nix-expr-c").}
+{.passC: staticExec"$PKG_CONFIG --cflags nix-expr-c".}
+{.passL: staticExec"$PKG_CONFIG --libs nix-expr-c".}
 proc initLibexpr*() =
   var ctx: NixContext
   discard libexpr_init(ctx)
