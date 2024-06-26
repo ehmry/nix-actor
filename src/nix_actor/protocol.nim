@@ -24,6 +24,8 @@ type
   
   EvalSuccess* {.preservesTuple.} = object
   
+  EvalFile* {.preservesRecord: "eval-file".} = object
+  
   EvalResultKind* {.pure.} = enum
     `Error`, `EvalSuccess`
   `EvalResult`* {.preservesOr.} = object
@@ -44,7 +46,18 @@ type
   
   ResolveStep* {.preservesRecord: "nix-actor".} = object
   
+  EvalFileResultKind* {.pure.} = enum
+    `Error`, `success`
+  `EvalFileResult`* {.preservesOr.} = object
+    case orKind*: EvalFileResultKind
+    of EvalFileResultKind.`Error`:
+      
+    of EvalFileResultKind.`success`:
+      
+  
   Instantiate* {.preservesRecord: "instantiate".} = object
+  
+  EvalFileSuccess* {.preservesTuple.} = object
   
   Outputs* {.preservesRecord: "outputs".} = object
   
@@ -52,20 +65,26 @@ type
   
 proc `$`*(x: Error | Eval | AttrSet | Realise | Derivation | RealiseResult |
     EvalSuccess |
+    EvalFile |
     EvalResult |
     InstantiateResult |
     ResolveStep |
+    EvalFileResult |
     Instantiate |
+    EvalFileSuccess |
     Outputs |
     ResolveDetail): string =
   `$`(toPreserves(x))
 
 proc encode*(x: Error | Eval | AttrSet | Realise | Derivation | RealiseResult |
     EvalSuccess |
+    EvalFile |
     EvalResult |
     InstantiateResult |
     ResolveStep |
+    EvalFileResult |
     Instantiate |
+    EvalFileSuccess |
     Outputs |
     ResolveDetail): seq[byte] =
   encode(toPreserves(x))
