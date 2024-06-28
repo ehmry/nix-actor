@@ -33,8 +33,6 @@ proc has_attr_byname*(context: NixContext; value: Value; state: EvalState;
                       name: cstring): bool {.nix_api_value.}
 proc get_attr_byidx*(context: NixContext; value: Value; state: EvalState;
                      i: cuint; name: ptr cstring): Value {.nix_api_value.}
-proc get_attr_name_byidx*(context: NixContext; value: Value; state: EvalState;
-                          i: cuint): cstring {.nix_api_value.}
 proc init_bool*(context: NixContext; value: Value; b: bool): nix_err {.
     nix_api_value.}
 proc init_string*(context: NixContext; value: Value; str: cstring): nix_err {.
