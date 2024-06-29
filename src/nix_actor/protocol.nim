@@ -14,77 +14,62 @@ type
   Derivation* {.preservesRecord: "drv".} = object
   
   RealiseResultKind* {.pure.} = enum
-    `Error`, `Outputs`
+    `Error`, `RealiseSuccess`
   `RealiseResult`* {.preservesOr.} = object
     case orKind*: RealiseResultKind
     of RealiseResultKind.`Error`:
       
-    of RealiseResultKind.`Outputs`:
+    of RealiseResultKind.`RealiseSuccess`:
       
   
-  EvalSuccess* {.preservesTuple.} = object
+  EvalSuccess* {.preservesRecord: "ok".} = object
+  
+  RealiseSuccess* {.preservesRecord: "ok".} = object
   
   EvalFile* {.preservesRecord: "eval-file".} = object
   
   EvalResultKind* {.pure.} = enum
-    `Error`, `EvalSuccess`
+    `err`, `ok`
   `EvalResult`* {.preservesOr.} = object
     case orKind*: EvalResultKind
-    of EvalResultKind.`Error`:
+    of EvalResultKind.`err`:
       
-    of EvalResultKind.`EvalSuccess`:
-      
-  
-  InstantiateResultKind* {.pure.} = enum
-    `Error`, `Derivation`
-  `InstantiateResult`* {.preservesOr.} = object
-    case orKind*: InstantiateResultKind
-    of InstantiateResultKind.`Error`:
-      
-    of InstantiateResultKind.`Derivation`:
+    of EvalResultKind.`ok`:
       
   
   ResolveStep* {.preservesRecord: "nix-actor".} = object
   
   EvalFileResultKind* {.pure.} = enum
-    `Error`, `success`
+    `err`, `ok`
   `EvalFileResult`* {.preservesOr.} = object
     case orKind*: EvalFileResultKind
-    of EvalFileResultKind.`Error`:
+    of EvalFileResultKind.`err`:
       
-    of EvalFileResultKind.`success`:
+    of EvalFileResultKind.`ok`:
       
   
-  Instantiate* {.preservesRecord: "instantiate".} = object
-  
-  EvalFileSuccess* {.preservesTuple.} = object
-  
-  Outputs* {.preservesRecord: "outputs".} = object
+  EvalFileSuccess* {.preservesRecord: "ok".} = object
   
   ResolveDetail* {.preservesDictionary.} = object
   
 proc `$`*(x: Error | Eval | AttrSet | Realise | Derivation | RealiseResult |
     EvalSuccess |
+    RealiseSuccess |
     EvalFile |
     EvalResult |
-    InstantiateResult |
     ResolveStep |
     EvalFileResult |
-    Instantiate |
     EvalFileSuccess |
-    Outputs |
     ResolveDetail): string =
   `$`(toPreserves(x))
 
 proc encode*(x: Error | Eval | AttrSet | Realise | Derivation | RealiseResult |
     EvalSuccess |
+    RealiseSuccess |
     EvalFile |
     EvalResult |
-    InstantiateResult |
     ResolveStep |
     EvalFileResult |
-    Instantiate |
     EvalFileSuccess |
-    Outputs |
     ResolveDetail): seq[byte] =
   encode(toPreserves(x))
