@@ -74,22 +74,24 @@ proc eval(store: Store; state: EvalState; expr: string): EvalResult =
   finally:
     close(nixVal)
 
-proc evalFile(store: Store; state: EvalState; path: string; args: Value): EvalFileResult =
-  var nixVal: NixValue
+proc evalFile(store: Store; state: EvalState; path: string; prArgs: Value): EvalFileResult =
+  var fn, arg, res: NixValue
   try:
-    var expr = """import $1 (builtins.fromJSON ''$2'')""" %
-        [path, args.jsonText]
-    nixVal = state.evalFromString(expr, "")
-    state.force(nixVal)
+    arg = prArgs.toNix(state)
+    fn = state.evalFromString("import " & path, "")
+    res = apply(state, fn, arg)
+    state.force(res)
     result = EvalFileResult(orKind: EvalFileResultKind.ok)
-    result.ok.result = nixVal.toPreserves(state).unthunkAll
-    result.ok.args = args
+    result.ok.result = res.toPreserves(state).unthunkAll
+    result.ok.args = prArgs
     result.ok.path = path
   except CatchableError as err:
     reset result
     result.err.message = err.msg
   finally:
-    close(nixVal)
+    close(res)
+    close(arg)
+    close(fn)
 
 proc serve(turn: Turn; detail: ResolveDetail; store: Store; state: EvalState;
            ds: Cap) =

