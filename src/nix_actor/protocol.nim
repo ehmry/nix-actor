@@ -29,10 +29,22 @@ type
   
   Derivation* {.preservesRecord: "drv".} = object
   
+  StoreResolveDetail* {.preservesDictionary.} = object
+  
+  CheckStorePath* {.preservesRecord: "check-path".} = object
+  
+  StoreResolveStep* {.preservesRecord: "nix-store".} = object
+  
 proc `$`*(x: Error | RepoArgs | RepoResolveStep | AttrSet | RepoResolveDetail |
-    Derivation): string =
+    Derivation |
+    StoreResolveDetail |
+    CheckStorePath |
+    StoreResolveStep): string =
   `$`(toPreserves(x))
 
 proc encode*(x: Error | RepoArgs | RepoResolveStep | AttrSet | RepoResolveDetail |
-    Derivation): seq[byte] =
+    Derivation |
+    StoreResolveDetail |
+    CheckStorePath |
+    StoreResolveStep): seq[byte] =
   encode(toPreserves(x))
