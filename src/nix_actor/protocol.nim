@@ -47,6 +47,17 @@ type
   
   StoreResolveDetail* {.preservesDictionary.} = object
   
+  ResultKind* {.pure.} = enum
+    `Error`, `ok`
+  ResultOk* {.preservesRecord: "ok".} = object
+  
+  `Result`* {.preservesOr.} = object
+    case orKind*: ResultKind
+    of ResultKind.`Error`:
+      
+    of ResultKind.`ok`:
+      
+  
   CheckStorePath* {.preservesRecord: "check-path".} = object
   
   StoreResolveStep* {.preservesRecord: "nix-store".} = object
@@ -55,6 +66,7 @@ proc `$`*(x: Error | RepoArgs | RepoResolveStep | AttrSet | RepoStore |
     RepoResolveDetail |
     Derivation |
     StoreResolveDetail |
+    Result |
     CheckStorePath |
     StoreResolveStep): string =
   `$`(toPreserves(x))
@@ -63,6 +75,7 @@ proc encode*(x: Error | RepoArgs | RepoResolveStep | AttrSet | RepoStore |
     RepoResolveDetail |
     Derivation |
     StoreResolveDetail |
+    Result |
     CheckStorePath |
     StoreResolveStep): seq[byte] =
   encode(toPreserves(x))
