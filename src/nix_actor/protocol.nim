@@ -60,6 +60,8 @@ type
   
   CheckStorePath* {.preservesRecord: "check-path".} = object
   
+  CopyClosure* {.preservesRecord: "copy-closure".} = object
+  
   StoreResolveStep* {.preservesRecord: "nix-store".} = object
   
 proc `$`*(x: Error | RepoArgs | RepoResolveStep | AttrSet | RepoStore |
@@ -68,6 +70,7 @@ proc `$`*(x: Error | RepoArgs | RepoResolveStep | AttrSet | RepoStore |
     StoreResolveDetail |
     Result |
     CheckStorePath |
+    CopyClosure |
     StoreResolveStep): string =
   `$`(toPreserves(x))
 
@@ -77,5 +80,6 @@ proc encode*(x: Error | RepoArgs | RepoResolveStep | AttrSet | RepoStore |
     StoreResolveDetail |
     Result |
     CheckStorePath |
+    CopyClosure |
     StoreResolveStep): seq[byte] =
   encode(toPreserves(x))

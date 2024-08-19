@@ -32,3 +32,5 @@ proc store_realise*(context: NixContext; store: Store; path: StorePath;
 proc store_get_version*(context: NixContext; store: Store;
                         callback: GetStringCallback; user_data: pointer): nix_err {.
     nix_api_store, discardable.}
+proc store_copy_closure*(context: NixContext; src, dst: Store; path: StorePath): nix_err {.
+    nix_api_store, discardable.}
