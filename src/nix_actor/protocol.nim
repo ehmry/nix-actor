@@ -45,7 +45,9 @@ type
   
   Derivation* {.preservesRecord: "drv".} = object
   
-  StoreResolveDetail* {.preservesDictionary.} = object
+  StoreResolveDetailCache* = Option[EmbeddedRef]
+  StoreResolveDetailUri* = string
+  `StoreResolveDetail`* {.preservesDictionary.} = object
   
   ResultKind* {.pure.} = enum
     `Error`, `ok`
@@ -62,6 +64,18 @@ type
   
   CopyClosure* {.preservesRecord: "copy-closure".} = object
   
+  CacheSpaceKind* {.pure.} = enum
+    `cacheSpace`, `absent`
+  CacheSpaceCacheSpace* {.preservesDictionary.} = object
+  
+  CacheSpaceAbsent* {.preservesDictionary.} = object
+  `CacheSpace`* {.preservesOr.} = object
+    case orKind*: CacheSpaceKind
+    of CacheSpaceKind.`cacheSpace`:
+      
+    of CacheSpaceKind.`absent`:
+      
+  
   StoreResolveStep* {.preservesRecord: "nix-store".} = object
   
 proc `$`*(x: Error | RepoArgs | RepoResolveStep | AttrSet | RepoStore |
@@ -71,6 +85,7 @@ proc `$`*(x: Error | RepoArgs | RepoResolveStep | AttrSet | RepoStore |
     Result |
     CheckStorePath |
     CopyClosure |
+    CacheSpace |
     StoreResolveStep): string =
   `$`(toPreserves(x))
 
@@ -81,5 +96,6 @@ proc encode*(x: Error | RepoArgs | RepoResolveStep | AttrSet | RepoStore |
     Result |
     CheckStorePath |
     CopyClosure |
+    CacheSpace |
     StoreResolveStep): seq[byte] =
   encode(toPreserves(x))
