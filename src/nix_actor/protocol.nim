@@ -21,6 +21,8 @@ type
   RepoResolveStep* {.preservesRecord: "nix-repo".} = object
   
   AttrSet* = Table[Symbol, Value]
+  Realise* {.preservesRecord: "realise".} = object
+  
   RepoStoreKind* {.pure.} = enum
     `uri`, `cap`, `absent`
   RepoStoreUri* {.preservesDictionary.} = object
@@ -38,6 +40,7 @@ type
       
   
   RepoResolveDetailArgs* = Option[Value]
+  RepoResolveDetailCache* = Option[EmbeddedRef]
   RepoResolveDetailImport* = string
   RepoResolveDetailLookupPath* = seq[string]
   RepoResolveDetailStore* = Option[Value]
@@ -60,6 +63,7 @@ type
     of ResultKind.`ok`:
       
   
+  Context* = EmbeddedRef
   CheckStorePath* {.preservesRecord: "check-path".} = object
   
   CopyClosure* {.preservesRecord: "copy-closure".} = object
@@ -78,22 +82,25 @@ type
   
   StoreResolveStep* {.preservesRecord: "nix-store".} = object
   
-proc `$`*(x: Error | RepoArgs | RepoResolveStep | AttrSet | RepoStore |
+proc `$`*(x: Error | RepoArgs | RepoResolveStep | AttrSet | Realise | RepoStore |
     RepoResolveDetail |
     Derivation |
     StoreResolveDetail |
     Result |
+    Context |
     CheckStorePath |
     CopyClosure |
     CacheSpace |
     StoreResolveStep): string =
   `$`(toPreserves(x))
 
-proc encode*(x: Error | RepoArgs | RepoResolveStep | AttrSet | RepoStore |
+proc encode*(x: Error | RepoArgs | RepoResolveStep | AttrSet | Realise |
+    RepoStore |
     RepoResolveDetail |
     Derivation |
     StoreResolveDetail |
     Result |
+    Context |
     CheckStorePath |
     CopyClosure |
     CacheSpace |
