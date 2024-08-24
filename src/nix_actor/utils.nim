@@ -9,7 +9,7 @@ proc newException(ctx: NixContext): ref NixException =
     n: cuint
     p = err_msg(NixContext(nil), ctx, addr n)
   result.msg.setLen(n)
-  if n >= 0:
+  if n > 0:
     copyMem(result.msg[0].addr, p, result.msg.len)
 
 template mitNix*(body: untyped): untyped =
