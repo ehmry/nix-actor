@@ -4,55 +4,26 @@ import
   preserves, std / tables, std / options
 
 type
-  Error* {.preservesRecord: "error".} = object
-  
   Eval* {.preservesRecord: "eval".} = object
   
-  RepoArgsKind* {.pure.} = enum
-    `present`, `absent`
-  RepoArgsPresent* {.preservesDictionary.} = object
-  
-  RepoArgsAbsent* {.preservesDictionary.} = object
-  `RepoArgs`* {.preservesOr.} = object
-    case orKind*: RepoArgsKind
-    of RepoArgsKind.`present`:
-      
-    of RepoArgsKind.`absent`:
-      
-  
-  RepoResolveStep* {.preservesRecord: "nix-repo".} = object
+  Error* {.preservesRecord: "error".} = object
   
   AttrSet* = Table[Symbol, Value]
+  LookupPathKind* {.pure.} = enum
+    `lookupPath`, `absent`
+  LookupPathLookupPath* {.preservesDictionary.} = object
+  
+  LookupPathAbsent* {.preservesDictionary.} = object
+  `LookupPath`* {.preservesOr.} = object
+    case orKind*: LookupPathKind
+    of LookupPathKind.`lookupPath`:
+      
+    of LookupPathKind.`absent`:
+      
+  
   Realise* {.preservesRecord: "realise".} = object
   
-  RepoStoreKind* {.pure.} = enum
-    `uri`, `cap`, `absent`
-  RepoStoreUri* {.preservesDictionary.} = object
-  
-  RepoStoreCap* {.preservesDictionary.} = object
-  
-  RepoStoreAbsent* {.preservesDictionary.} = object
-  `RepoStore`* {.preservesOr.} = object
-    case orKind*: RepoStoreKind
-    of RepoStoreKind.`uri`:
-      
-    of RepoStoreKind.`cap`:
-      
-    of RepoStoreKind.`absent`:
-      
-  
-  RepoResolveDetailArgs* = Option[Value]
-  RepoResolveDetailCache* = Option[EmbeddedRef]
-  RepoResolveDetailImport* = string
-  RepoResolveDetailLookupPath* = seq[string]
-  RepoResolveDetailStore* = Option[Value]
-  `RepoResolveDetail`* {.preservesDictionary.} = object
-  
   Derivation* {.preservesRecord: "drv".} = object
-  
-  StoreResolveDetailCache* = Option[EmbeddedRef]
-  StoreResolveDetailUri* = string
-  `StoreResolveDetail`* {.preservesDictionary.} = object
   
   ResultKind* {.pure.} = enum
     `Error`, `ok`
@@ -65,8 +36,38 @@ type
     of ResultKind.`ok`:
       
   
-  Context* = EmbeddedRef
+  StoreParamsKind* {.pure.} = enum
+    `storeParams`, `absent`
+  StoreParamsStoreParams* {.preservesDictionary.} = object
+  
+  StoreParamsAbsent* {.preservesDictionary.} = object
+  `StoreParams`* {.preservesOr.} = object
+    case orKind*: StoreParamsKind
+    of StoreParamsKind.`storeParams`:
+      
+    of StoreParamsKind.`absent`:
+      
+  
+  NixResolveStep* {.preservesRecord: "nix".} = object
+  
   CheckStorePath* {.preservesRecord: "check-path".} = object
+  
+  StoreUriKind* {.pure.} = enum
+    `storeUri`, `absent`
+  StoreUriStoreUri* {.preservesDictionary.} = object
+  
+  StoreUriAbsent* {.preservesDictionary.} = object
+  `StoreUri`* {.preservesOr.} = object
+    case orKind*: StoreUriKind
+    of StoreUriKind.`storeUri`:
+      
+    of StoreUriKind.`absent`:
+      
+  
+  NixResolveDetailCache* = Option[EmbeddedRef]
+  NixResolveDetailLookupPath* = Option[seq[string]]
+  NixResolveDetailStoreUri* = Option[string]
+  `NixResolveDetail`* {.preservesDictionary.} = object
   
   CopyClosure* {.preservesRecord: "copy-closure".} = object
   
@@ -82,30 +83,23 @@ type
     of CacheSpaceKind.`absent`:
       
   
-  StoreResolveStep* {.preservesRecord: "nix-store".} = object
-  
-proc `$`*(x: Error | Eval | RepoArgs | RepoResolveStep | AttrSet | Realise |
-    RepoStore |
-    RepoResolveDetail |
-    Derivation |
-    StoreResolveDetail |
-    Result |
-    Context |
+proc `$`*(x: Eval | Error | AttrSet | LookupPath | Realise | Derivation | Result |
+    StoreParams |
+    NixResolveStep |
     CheckStorePath |
+    StoreUri |
+    NixResolveDetail |
     CopyClosure |
-    CacheSpace |
-    StoreResolveStep): string =
+    CacheSpace): string =
   `$`(toPreserves(x))
 
-proc encode*(x: Error | Eval | RepoArgs | RepoResolveStep | AttrSet | Realise |
-    RepoStore |
-    RepoResolveDetail |
-    Derivation |
-    StoreResolveDetail |
+proc encode*(x: Eval | Error | AttrSet | LookupPath | Realise | Derivation |
     Result |
-    Context |
+    StoreParams |
+    NixResolveStep |
     CheckStorePath |
+    StoreUri |
+    NixResolveDetail |
     CopyClosure |
-    CacheSpace |
-    StoreResolveStep): seq[byte] =
+    CacheSpace): seq[byte] =
   encode(toPreserves(x))
