@@ -21,8 +21,6 @@ type
     of LookupPathKind.`absent`:
       
   
-  Realise* {.preservesRecord: "realise".} = object
-  
   Derivation* {.preservesRecord: "drv".} = object
   
   ResultKind* {.pure.} = enum
@@ -49,6 +47,8 @@ type
       
   
   NixResolveStep* {.preservesRecord: "nix".} = object
+  
+  RealiseString* {.preservesRecord: "realise-string".} = object
   
   CheckStorePath* {.preservesRecord: "check-path".} = object
   
@@ -83,9 +83,10 @@ type
     of CacheSpaceKind.`absent`:
       
   
-proc `$`*(x: Eval | Error | AttrSet | LookupPath | Realise | Derivation | Result |
+proc `$`*(x: Eval | Error | AttrSet | LookupPath | Derivation | Result |
     StoreParams |
     NixResolveStep |
+    RealiseString |
     CheckStorePath |
     StoreUri |
     NixResolveDetail |
@@ -93,10 +94,10 @@ proc `$`*(x: Eval | Error | AttrSet | LookupPath | Realise | Derivation | Result
     CacheSpace): string =
   `$`(toPreserves(x))
 
-proc encode*(x: Eval | Error | AttrSet | LookupPath | Realise | Derivation |
-    Result |
+proc encode*(x: Eval | Error | AttrSet | LookupPath | Derivation | Result |
     StoreParams |
     NixResolveStep |
+    RealiseString |
     CheckStorePath |
     StoreUri |
     NixResolveDetail |
