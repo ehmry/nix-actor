@@ -21,8 +21,6 @@ type
     of LookupPathKind.`absent`:
       
   
-  Derivation* {.preservesRecord: "drv".} = object
-  
   ResultKind* {.pure.} = enum
     `Error`, `ok`
   ResultOk* {.preservesRecord: "ok".} = object
@@ -50,8 +48,6 @@ type
   
   RealiseString* {.preservesRecord: "realise-string".} = object
   
-  CheckStorePath* {.preservesRecord: "check-path".} = object
-  
   StoreUriKind* {.pure.} = enum
     `storeUri`, `absent`
   StoreUriStoreUri* {.preservesDictionary.} = object
@@ -64,43 +60,20 @@ type
     of StoreUriKind.`absent`:
       
   
-  NixResolveDetailCache* = Option[EmbeddedRef]
   NixResolveDetailLookupPath* = Option[seq[string]]
   NixResolveDetailStoreUri* = Option[string]
   `NixResolveDetail`* {.preservesDictionary.} = object
   
-  CopyClosure* {.preservesRecord: "copy-closure".} = object
-  
-  CacheSpaceKind* {.pure.} = enum
-    `cacheSpace`, `absent`
-  CacheSpaceCacheSpace* {.preservesDictionary.} = object
-  
-  CacheSpaceAbsent* {.preservesDictionary.} = object
-  `CacheSpace`* {.preservesOr.} = object
-    case orKind*: CacheSpaceKind
-    of CacheSpaceKind.`cacheSpace`:
-      
-    of CacheSpaceKind.`absent`:
-      
-  
-proc `$`*(x: Eval | Error | AttrSet | LookupPath | Derivation | Result |
-    StoreParams |
+proc `$`*(x: Eval | Error | AttrSet | LookupPath | Result | StoreParams |
     NixResolveStep |
     RealiseString |
-    CheckStorePath |
     StoreUri |
-    NixResolveDetail |
-    CopyClosure |
-    CacheSpace): string =
+    NixResolveDetail): string =
   `$`(toPreserves(x))
 
-proc encode*(x: Eval | Error | AttrSet | LookupPath | Derivation | Result |
-    StoreParams |
+proc encode*(x: Eval | Error | AttrSet | LookupPath | Result | StoreParams |
     NixResolveStep |
     RealiseString |
-    CheckStorePath |
     StoreUri |
-    NixResolveDetail |
-    CopyClosure |
-    CacheSpace): seq[byte] =
+    NixResolveDetail): seq[byte] =
   encode(toPreserves(x))
