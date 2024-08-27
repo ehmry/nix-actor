@@ -4,6 +4,10 @@ import
   preserves, std / tables, std / options
 
 type
+  EvalResolveDetailLookupPath* = Option[seq[string]]
+  EvalResolveDetailStoreUri* = Option[string]
+  `EvalResolveDetail`* {.preservesDictionary.} = object
+  
   Eval* {.preservesRecord: "eval".} = object
   
   Error* {.preservesRecord: "error".} = object
@@ -21,16 +25,8 @@ type
     of LookupPathKind.`absent`:
       
   
-  ResultKind* {.pure.} = enum
-    `Error`, `ok`
-  ResultOk* {.preservesRecord: "ok".} = object
-  
-  `Result`* {.preservesOr.} = object
-    case orKind*: ResultKind
-    of ResultKind.`Error`:
-      
-    of ResultKind.`ok`:
-      
+  StoreResolveDetailStoreUri* = string
+  `StoreResolveDetail`* {.preservesDictionary.} = object
   
   StoreParamsKind* {.pure.} = enum
     `storeParams`, `absent`
@@ -44,9 +40,20 @@ type
     of StoreParamsKind.`absent`:
       
   
-  NixResolveStep* {.preservesRecord: "nix".} = object
+  ResultKind* {.pure.} = enum
+    `Error`, `ok`
+  ResultOk* {.preservesRecord: "ok".} = object
+  
+  `Result`* {.preservesOr.} = object
+    case orKind*: ResultKind
+    of ResultKind.`Error`:
+      
+    of ResultKind.`ok`:
+      
   
   RealiseString* {.preservesRecord: "realise-string".} = object
+  
+  CheckStorePath* {.preservesRecord: "check-path".} = object
   
   StoreUriKind* {.pure.} = enum
     `storeUri`, `absent`
@@ -60,20 +67,32 @@ type
     of StoreUriKind.`absent`:
       
   
-  NixResolveDetailLookupPath* = Option[seq[string]]
-  NixResolveDetailStoreUri* = Option[string]
-  `NixResolveDetail`* {.preservesDictionary.} = object
+  Replicate* {.preservesRecord: "replicate".} = object
   
-proc `$`*(x: Eval | Error | AttrSet | LookupPath | Result | StoreParams |
-    NixResolveStep |
+  StoreResolveStep* {.preservesRecord: "nix-store".} = object
+  
+  EvalResolveStep* {.preservesRecord: "nix".} = object
+  
+proc `$`*(x: EvalResolveDetail | Eval | Error | AttrSet | LookupPath |
+    StoreResolveDetail |
+    StoreParams |
+    Result |
     RealiseString |
+    CheckStorePath |
     StoreUri |
-    NixResolveDetail): string =
+    Replicate |
+    StoreResolveStep |
+    EvalResolveStep): string =
   `$`(toPreserves(x))
 
-proc encode*(x: Eval | Error | AttrSet | LookupPath | Result | StoreParams |
-    NixResolveStep |
+proc encode*(x: EvalResolveDetail | Eval | Error | AttrSet | LookupPath |
+    StoreResolveDetail |
+    StoreParams |
+    Result |
     RealiseString |
+    CheckStorePath |
     StoreUri |
-    NixResolveDetail): seq[byte] =
+    Replicate |
+    StoreResolveStep |
+    EvalResolveStep): seq[byte] =
   encode(toPreserves(x))
