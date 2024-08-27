@@ -111,8 +111,8 @@ suite "nixpkgs":
       checkpoint "stepB"
       block:
         ## stepB
-        publish(turn, nix, Eval(expr: "_: pkg: pkg.meta.homepage", args: %true,
-                                result: stepC))
+        publish(turn, nix, Eval(expr: "_: pkg: pkg.meta.homepage",
+                                args: %false, result: stepC))
     let stepA = newResultContinuation(turn)do (turn: Turn; nix: Cap):
       checkpoint "stepA"
       block:
